@@ -102,7 +102,6 @@ private fun NewsScreen(
                 value = state.query ,
                 onValueChange = {
                     onAction(NewsAction.OnQueryChange(it))
-                    onAction(NewsAction.OnSearch)
                 } ,
                 label = { Text("Search News") } ,
                 modifier = Modifier
