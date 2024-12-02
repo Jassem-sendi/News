@@ -35,18 +35,15 @@ class NewsViewModel(
                     query = action.query
                 )
                 searchArticle(state.query)
-
             }
         }
     }
 
     var searchJob: Job? = null
     private fun searchArticle(query: String) {
-        if (query == state.query) {
-            searchJob?.cancel()
+        searchJob?.cancel()
             searchJob = viewModelScope.launch {
                 delay(100)
-
                 state = state.copy(
                     isLoading = true
                 )
@@ -71,7 +68,6 @@ class NewsViewModel(
                 )
             }
         }
-    }
 
     private fun loadNews() {
         viewModelScope.launch {
