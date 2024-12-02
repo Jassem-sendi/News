@@ -98,7 +98,17 @@ private fun NewsScreen(
                 .padding(innerPadding)
         ) {
 
-
+            TextField(
+                value = state.query ,
+                onValueChange = {
+                    onAction(NewsAction.OnQueryChange(it))
+                    onAction(NewsAction.OnSearch)
+                } ,
+                label = { Text("Search News") } ,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            )
                 Box(
                     modifier = Modifier
                         .background(MaterialTheme.colorScheme.background)

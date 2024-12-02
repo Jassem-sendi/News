@@ -18,7 +18,7 @@ class NewsViewModel(
 
     var state by mutableStateOf(NewsState())
         private set
-
+    var searchJob : Job? = null
     init {
         loadNews()
     }
@@ -29,10 +29,44 @@ class NewsViewModel(
                 paginate()
             }
 
+            is NewsAction.OnSearch -> searchArticle(state.query)
+            is NewsAction.OnQueryChange -> {
+                state = state.copy(
+                    query = action.query
+                )
 
+            }
         }
     }
+    private fun searchArticle(query: String) {
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            delay(100)
+            state = state.copy(
+                isLoading = true
+            )
+            if (query == state.query) {
+                newsRepository.searchArticle(query).let { newResult ->
+                    state = when (newResult) {
+                        is NewsResult.Error -> {
+                            state.copy(isError = true)
+                        }
+                        is NewsResult.Success -> {
+                            state.copy(
+                                isError = false,
+                                articleList = newResult.data?.articles ?: emptyList(),
+                                nextPage = newResult.data?.nextPage
+                            )
+                        }
+                    }
+                }
 
+                state = state.copy(
+                    isLoading = false
+                )
+            }
+        }
+    }
     private fun loadNews() {
         viewModelScope.launch {
             state = state.copy(
