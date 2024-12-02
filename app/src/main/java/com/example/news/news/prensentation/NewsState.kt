@@ -7,4 +7,5 @@ data class NewsState(
     val isLoading: Boolean = false ,
     val isError: Boolean = false ,
     val isPaginating: Boolean = false ,
+    val query: String = ""
 )

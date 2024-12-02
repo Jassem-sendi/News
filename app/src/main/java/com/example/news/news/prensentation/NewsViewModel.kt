@@ -30,8 +30,44 @@ class NewsViewModel(
             }
 
 
+            is NewsAction.OnQueryChange -> {
+                state = state.copy(
+                    query = action.query
+                )
+                searchArticle(state.query)
+            }
         }
     }
+
+    var searchJob: Job? = null
+    private fun searchArticle(query: String) {
+        searchJob?.cancel()
+            searchJob = viewModelScope.launch {
+                delay(100)
+                state = state.copy(
+                    isLoading = true
+                )
+                newsRepository.searchArticle(query).let { newResult ->
+                    state = when (newResult) {
+                        is NewsResult.Error -> {
+                            state.copy(isError = true)
+                        }
+
+                        is NewsResult.Success -> {
+                            state.copy(
+                                isError = false ,
+                                articleList = newResult.data?.articles ?: emptyList() ,
+                                nextPage = newResult.data?.nextPage
+                            )
+                        }
+                    }
+                }
+
+                state = state.copy(
+                    isLoading = false
+                )
+            }
+        }
 
     private fun loadNews() {
         viewModelScope.launch {
@@ -47,8 +83,8 @@ class NewsViewModel(
 
                     is NewsResult.Success -> {
                         state.copy(
-                            isError = false,
-                            articleList = newResult.data?.articles ?: emptyList(),
+                            isError = false ,
+                            articleList = newResult.data?.articles ?: emptyList() ,
                             nextPage = newResult.data?.nextPage
                         )
                     }
@@ -64,7 +100,7 @@ class NewsViewModel(
     private fun paginate() {
         viewModelScope.launch {
             state = state.copy(
-                isLoading = true,
+                isLoading = true ,
                 isPaginating = true
             )
             newsRepository.paginate(state.nextPage).let { newResult ->
@@ -77,16 +113,16 @@ class NewsViewModel(
                     is NewsResult.Success -> {
                         val articles = newResult.data?.articles ?: emptyList()
                         state.copy(
-                            isError = false,
-                            articleList = state.articleList + articles,
-                            nextPage = newResult.data?.nextPage,
+                            isError = false ,
+                            articleList = state.articleList + articles ,
+                            nextPage = newResult.data?.nextPage ,
                         )
                     }
                 }
             }
 
             state = state.copy(
-                isLoading = false,
+                isLoading = false ,
                 isPaginating = false
             )
         }
